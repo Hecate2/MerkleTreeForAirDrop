@@ -13,9 +13,9 @@ namespace MerkleTreeForAirDrop
     {
         const byte LEAF = 0x00;
         const byte INTERNAL = 0x01;
-        public static UInt256 VerifyMerkleTree(UInt160 account, BigInteger amount, UInt256[] proof)
+        public static UInt256 VerifyMerkleTree(UInt160 account, BigInteger amount, BigInteger nonce, UInt256[] proof)
         {
-            UInt256 digest = (UInt256)CryptoLib.Sha256(StdLib.Serialize(new object[] { LEAF, account, amount }));
+            UInt256 digest = (UInt256)CryptoLib.Sha256(StdLib.Serialize(new object[] { LEAF, account, amount, nonce }));
             foreach (UInt256 sibling in proof)
             {
                 if ((BigInteger)digest < (BigInteger)sibling)
@@ -26,10 +26,10 @@ namespace MerkleTreeForAirDrop
             return digest;
         }
 
-        public static UInt256 LeafHash(UInt160 account, BigInteger amount) => (UInt256)CryptoLib.Sha256(StdLib.Serialize(new object[] { LEAF, account, amount }));
+        public static UInt256 LeafHash(UInt160 account, BigInteger amount, BigInteger nonce) => (UInt256)CryptoLib.Sha256(StdLib.Serialize(new object[] { LEAF, account, amount, nonce }));
         public static UInt256 InternalHash(UInt256 child1, UInt256 child2) => (BigInteger)child1 < (BigInteger)child2 ? (UInt256)CryptoLib.Sha256(StdLib.Serialize(new object[] { INTERNAL, child1, child2 })) : (UInt256)CryptoLib.Sha256(StdLib.Serialize(new object[] { INTERNAL, child2, child1 }));
 
-        public static object[] ComputeMerkleTree(UInt160[] account, BigInteger[] amount)
+        public static object[] ComputeMerkleTree(UInt160[] account, BigInteger[] amount, BigInteger nonce)
         {
             int length = account.Length;
             ExecutionEngine.Assert(amount.Length == length);
@@ -42,7 +42,7 @@ namespace MerkleTreeForAirDrop
             UInt256[] currentTreeLayer = new UInt256[length];
             int i = 0;
             for (; i < length; i++)
-                currentTreeLayer[i] = (UInt256)CryptoLib.Sha256(StdLib.Serialize(new object[] { LEAF, account[i], amount[i] }));
+                currentTreeLayer[i] = (UInt256)CryptoLib.Sha256(StdLib.Serialize(new object[] { LEAF, account[i], amount[i], nonce }));
             treeDepth -= 1;
             tree[treeDepth] = currentTreeLayer;
             UInt256[] prevTreeLayer;
@@ -66,7 +66,7 @@ namespace MerkleTreeForAirDrop
             }
             return tree;
         }
-        public static UInt256 ComputeMerkleTreeRoot(UInt160[] account, BigInteger[] amount)
+        public static UInt256 ComputeMerkleTreeRoot(UInt160[] account, BigInteger[] amount, BigInteger nonce)
         {
             int length = account.Length;
             ExecutionEngine.Assert(amount.Length == length);
@@ -79,7 +79,7 @@ namespace MerkleTreeForAirDrop
             UInt256[] currentTreeLayer = new UInt256[length];
             i = 0;
             for (; i < length; i++)
-                currentTreeLayer[i] = (UInt256)CryptoLib.Sha256(StdLib.Serialize(new object[] { LEAF, account[i], amount[i] }));
+                currentTreeLayer[i] = (UInt256)CryptoLib.Sha256(StdLib.Serialize(new object[] { LEAF, account[i], amount[i], nonce }));
             treeDepth -= 1;
             UInt256[] prevTreeLayer;
             while (length > 1 && treeDepth > 0)
