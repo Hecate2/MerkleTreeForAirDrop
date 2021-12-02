@@ -59,8 +59,10 @@ assert tree[0][0] == client.invokefunction(
         [wallet_hash, 19_999_999_999, nonce, [user1_leaf_hash, internal_right_hash]]], relay=False)
 
 # scale test
-# client.invokefunction('anyUpdate', params=[merkle_tree_nef, merkle_tree_manifest, 'computeMerkleTree', [accounts * 167, amounts * 167]], relay=False)
-# client.print_previous_result()
-# print(len(client.previous_result))
-# client.invokefunction('anyUpdate', params=[merkle_tree_nef, merkle_tree_manifest, 'computeMerkleTreeRoot', [accounts * 192, amounts * 192]], relay=False)
-# client.print_previous_result()
+client.invokefunction('anyUpdate', params=[merkle_tree_nef, merkle_tree_manifest, 'computeMerkleTree', [accounts * 167, amounts * 167, nonce]], relay=False)
+client.print_previous_result()
+print(len(client.previous_result))
+client.invokefunction('anyUpdate', params=[merkle_tree_nef, merkle_tree_manifest, 'computeMerkleTreeRoot', [accounts * 192, amounts * 192, nonce]], relay=False)
+client.print_previous_result()
+assert 'MaxStackSize exceed' in client.invokefunction('anyUpdate', params=[merkle_tree_nef, merkle_tree_manifest, 'computeMerkleTree', [accounts * 168, amounts * 168, nonce]], relay=False, do_not_raise_on_result=True)
+assert 'MaxStackSize exceed' in client.invokefunction('anyUpdate', params=[merkle_tree_nef, merkle_tree_manifest, 'computeMerkleTreeRoot', [accounts * 193, amounts * 193, nonce]], relay=False, do_not_raise_on_result=True)
