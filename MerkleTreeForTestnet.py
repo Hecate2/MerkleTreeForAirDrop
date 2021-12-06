@@ -24,6 +24,11 @@ accounts = [Hash160Str("0x9986401eff887735bae28549f2d2978fd1df1fa9"),
 amounts = [1234567898765, 21234567898765, 41234567898765, 51234567898765]
 nonce = 0
 
+for i in accounts:
+    assert type(i) is Hash160Str
+for i in amounts:
+    assert type(i) is int
+
 signer = Signer(wallet_hash, scopes=WitnessScope.Global)
 client = TestClient(target_url, short_anyupdate_hash, wallet_hash, wallet_address, 'testnet.json', '1')
 client.invokefunction('anyUpdate', params=[merkle_tree_nef, merkle_tree_manifest, 'computeMerkleTreeRoot', [accounts, amounts, nonce]], relay=False)
