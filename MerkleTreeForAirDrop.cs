@@ -66,6 +66,43 @@ namespace MerkleTreeForAirDrop
             }
             return tree;
         }
+        public static object[] ComputeMerkleTreeWithDifferentNonce(UInt160[] account, BigInteger[] amount, BigInteger[] nonce)
+        {
+            int length = account.Length;
+            ExecutionEngine.Assert(amount.Length == length);
+            int treeDepth = 0;
+            while (BigInteger.Pow(2, treeDepth) < length)
+                treeDepth += 1;
+            treeDepth += 1;
+            object[] tree = new object[treeDepth];
+
+            UInt256[] currentTreeLayer = new UInt256[length];
+            int i = 0;
+            for (; i < length; i++)
+                currentTreeLayer[i] = (UInt256)CryptoLib.Sha256(StdLib.Serialize(new object[] { LEAF, account[i], amount[i], nonce[i] }));
+            treeDepth -= 1;
+            tree[treeDepth] = currentTreeLayer;
+            UInt256[] prevTreeLayer;
+            while (length > 1 && treeDepth > 0)
+            {
+                prevTreeLayer = currentTreeLayer;
+                if (length % 2 == 0)
+                    length /= 2;
+                else
+                    length = length / 2 + 1;
+                treeDepth -= 1;
+                currentTreeLayer = new UInt256[length];
+                i = 0;
+                for (; i < length - 1; i++)
+                    currentTreeLayer[i] = InternalHash(prevTreeLayer[i * 2], prevTreeLayer[i * 2 + 1]);
+                if (i * 2 + 1 < prevTreeLayer.Length)
+                    currentTreeLayer[i] = InternalHash(prevTreeLayer[i * 2], prevTreeLayer[i * 2 + 1]);
+                else
+                    currentTreeLayer[i] = InternalHash(UInt256.Zero, prevTreeLayer[i * 2]);
+                tree[treeDepth] = currentTreeLayer;
+            }
+            return tree;
+        }
         public static UInt256 ComputeMerkleTreeRoot(UInt160[] account, BigInteger[] amount, BigInteger nonce)
         {
             int length = account.Length;
